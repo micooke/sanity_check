@@ -68,11 +68,11 @@ void dlcInit() {
   delay(300);
 }
 
-int dlcCommand(byte cmd, byte num, byte loc, byte len, byte data[]) {
+int dlcCommand(byte cmd, byte num, byte loc, byte len, byte (&data)[BTDATA_SIZE]) {
   byte crc = (0xFF - (cmd + num + loc + len - 0x01)); // checksum FF - (cmd + num + loc + len - 0x01)
 
   unsigned long timeOut = millis() + 250; // timeout @ 250 ms
-  memset(data, 0x00, (size_t)(BTDATA_SIZE*sizeof(data)));
+  memset(&data, 0x00, sizeof(data));
 
   dlcSerial.listen();
 
@@ -100,14 +100,14 @@ int dlcCommand(byte cmd, byte num, byte loc, byte len, byte data[]) {
 }
 
 void procbtSerial(void) {
-  char btdata1[BTDATA_SIZE];  // bt data in buffer - btdata1 is an ARRAY of 20 bytes (chars)
-  char btdata2[BTDATA_SIZE];  // bt data out buffer - btdata2 is an ARRAY of 20 bytes (chars)
-  byte dlcdata[BTDATA_SIZE];  // dlc data buffer   - btdata is an ARRAY of 20 bytes (chars)
+  char btdata1[BTDATA_SIZE] = {'\0'};  // bt data in buffer - btdata1 is an ARRAY of 20 bytes (chars)
+  char btdata2[BTDATA_SIZE] = {'\0'};  // bt data out buffer - btdata2 is an ARRAY of 20 bytes (chars)
+  byte dlcdata[BTDATA_SIZE] = { 0 };  // dlc data buffer   - btdata is an ARRAY of 20 bytes (chars)
   int i = 0;
 
 //  float Temperature = 0;    //used with Dallas sensor code block
 
-  memset(btdata1, '\0', (size_t)(BTDATA_SIZE*sizeof(btdata1)));
+  //memset(&btdata1, '\0', sizeof(btdata1));
   while (i < BTDATA_SIZE)
   {
     if (btSerial.available()) {
@@ -122,7 +122,7 @@ void procbtSerial(void) {
     }
   }
 
-  memset(btdata2, '\0', (size_t)(BTDATA_SIZE*sizeof(btdata2)));
+  //memset(&btdata2, '\0', sizeof(btdata2));
 
   //  ELM327 message emulations (Hayes serial modem style commands)
   if (!strcmp(btdata1, "ATD")) {
